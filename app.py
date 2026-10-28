@@ -216,7 +216,6 @@ except Exception as exc:
 
 with st.sidebar:
     st.header("Where to next?")
-    st.divider()
     search = st.text_input("Search names, places, or notes", placeholder="Try 'waterfall'...")
     categories = st.multiselect("Adventure type", CATEGORIES, default=[])
     statuses = st.multiselect("Status", STATUSES, default=[])

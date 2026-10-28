@@ -309,7 +309,7 @@ with tab_list:
 
 with tab_map:
     st.markdown("<div class='dd-section'>✹ Wandering about</div>", unsafe_allow_html=True)
-    st.caption("Click a map pin to see that adventure’s details. Use the directions link to navigate there in Google Maps.")
+    st.caption("Click to see adventure’s details")
     if not df.empty and {"latitude", "longitude"}.issubset(df.columns):
         mapped = df.copy()
         mapped["latitude"] = pd.to_numeric(mapped["latitude"], errors="coerce")
@@ -398,7 +398,7 @@ with tab_map:
                 if clean_text(selected_row.get("notes", "")):
                     st.markdown(f"<div class='dd-note'>✿ {clean_text(selected_row.get('notes', ''))}</div>", unsafe_allow_html=True)
                 directions_url = f"https://www.google.com/maps/dir/?api=1&destination={float(selected_row['latitude']):.6f}%2C{float(selected_row['longitude']):.6f}&travelmode=driving"
-                st.markdown(f"[🚗 Get directions to this adventure in Google Maps ↗]({directions_url})")
+                st.markdown(f"[🚗 Directions ↗]({directions_url})")
                 if st.button("✎ Edit this adventure", key=f"map_edit_{selected_id}"):
                     st.session_state["editing_adventure"] = str(selected_id)
                     st.info("Open the Adventures tab to edit the selected entry.")

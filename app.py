@@ -33,6 +33,14 @@ st.markdown("""
 input, textarea, button, select, option {
   font-family: var(--body-font) !important;
 }
+/* Keep Streamlit's built-in icon font intact (including the password eye toggle).
+   The broad vintage-font rules above otherwise turn the word "visibility" into text. */
+.material-icons, .material-symbols-rounded, .material-symbols-outlined,
+[data-testid="stIconMaterial"], [data-testid="stIconMaterial"] * {
+  font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important;
+  font-feature-settings: "liga" !important;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
 h1, h2, h3, h4, h5, h6,
 [data-testid="stMarkdownContainer"] h1, [data-testid="stMarkdownContainer"] h2,
 [data-testid="stMarkdownContainer"] h3, [data-testid="stMetricValue"],

@@ -7,14 +7,40 @@ st.set_page_config(page_title="The Dilly Dally List", page_icon="🧭", layout="
 
 st.markdown("""
 <style>
-.block-container {padding-top: 1.5rem; padding-bottom: 3rem; max-width: 1200px;}
-div[data-testid="stForm"] {border: 1px solid #e6e0eb; border-radius: 14px; padding: 1rem;}
-.adventure-card {padding: 1rem; border: 1px solid #e8e4eb; border-radius: 14px; margin-bottom: .75rem;}
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap');
+:root { --cream:#fff7e7; --paper:#fffdf7; --ink:#243c36; --tomato:#d95e3f; --gold:#e9b949; --sage:#8b9c68; --pink:#e7a28d; }
+.stApp { background: #fff8eb; color: var(--ink); }
+.block-container {padding-top: 1.2rem; padding-bottom: 3rem; max-width: 1240px;}
+[data-testid="stSidebar"] {background: #e9edda; border-right: 2px solid #d9dfc6;}
+[data-testid="stSidebar"] h2, [data-testid="stSidebar"] label {color:#243c36;}
+h1, h2, h3 {font-family:'Fraunces', Georgia, serif !important; color:#243c36; letter-spacing:-.035em;}
+p, label, div, span {font-family:'DM Mono', 'Trebuchet MS', sans-serif;}
+[data-testid="stMetric"] {background:#fffdf7; border:2px solid #243c36; border-radius:16px; padding:15px 18px; box-shadow:4px 4px 0 #e9b949;}
+[data-testid="stMetricLabel"] {color:#5b6b4d; font-size:.8rem; text-transform:uppercase; letter-spacing:.08em;}
+[data-testid="stMetricValue"] {color:#d95e3f; font-family:'Fraunces',Georgia,serif;}
+[data-testid="stTabs"] button {font-family:'DM Mono',monospace; font-weight:600; border-radius:999px; padding:.55rem 1rem;}
+[data-testid="stTabs"] button[aria-selected="true"] {background:#243c36; color:#fff7e7;}
+.stButton button, [data-testid="stFormSubmitButton"] button {border:2px solid #243c36; border-radius:999px; font-weight:700; box-shadow:3px 3px 0 #e9b949; transition:transform .15s ease;}
+.stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {transform:translate(-1px,-1px); border-color:#243c36; box-shadow:4px 4px 0 #d95e3f;}
+[data-testid="stForm"] {background:#fffdf7; border:2px solid #d9dfc6; border-radius:18px; padding:1.1rem;}
+[data-testid="stExpander"] {background:#fffdf7; border:1px solid #d9dfc6; border-radius:12px;}
+input, textarea, [data-baseweb="select"] > div {border-radius:10px !important;}
+.dd-hero {background:#f2c85b; border:3px solid #243c36; border-radius:24px; padding:1.35rem 1.5rem; margin:.1rem 0 1.2rem; box-shadow:7px 7px 0 #d95e3f; position:relative; overflow:hidden;}
+.dd-hero h1 {font-size:clamp(2.2rem,5vw,4.1rem); line-height:.98; margin:.2rem 0 .55rem; color:#243c36;}
+.dd-hero p {margin:0; max-width:620px; font-size:.94rem; line-height:1.65; color:#243c36;}
+.dd-kicker {text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:700; color:#d95e3f;}
+.dd-sticker {display:inline-block; border:2px solid #243c36; border-radius:999px; background:#fff7e7; padding:.28rem .65rem; margin:.7rem .25rem 0 0; font-family:'DM Mono',monospace; font-size:.7rem; font-weight:700; transform:rotate(-2deg);}
+.dd-section {font-family:'Fraunces',Georgia,serif; font-size:1.65rem; font-weight:800; color:#243c36; margin:.25rem 0 .7rem;}
+.dd-note {background:#e9edda; border-left:5px solid #8b9c68; padding:.8rem 1rem; border-radius:0 12px 12px 0; color:#243c36;}
+@media (max-width: 700px) { .block-container {padding-left:1rem; padding-right:1rem;} .dd-hero {padding:1.1rem;} }
 </style>
+<div class="dd-hero">
+  <div class="dd-kicker">✳ collect moments, not things ✳</div>
+  <h1>The Dilly Dally List</h1>
+  <p>A little retro field guide for big fresh-air energy, spontaneous road trips, campfire nights, and places worth taking the long way to.</p>
+  <span class="dd-sticker">✿ TAKE THE SCENIC ROUTE</span><span class="dd-sticker">★ OUT THERE SOMEWHERE</span>
+</div>
 """, unsafe_allow_html=True)
-
-st.title("🧭 The Dilly Dally List")
-st.caption("A shared home for hikes, day trips, camping ideas, and little adventures.")
 
 # Simple shared-password gate. Store the password and database credentials in Streamlit Secrets.
 if "APP_PASSWORD" not in st.secrets or "SUPABASE_URL" not in st.secrets or "SUPABASE_SERVICE_ROLE_KEY" not in st.secrets:
@@ -23,7 +49,7 @@ if "APP_PASSWORD" not in st.secrets or "SUPABASE_URL" not in st.secrets or "SUPA
 
 if not st.session_state.get("signed_in", False):
     with st.form("login_form"):
-        st.subheader("Welcome, dilly-dallier!")
+        st.subheader("Welcome, dilly-dallier! ✿")
         password = st.text_input("Shared app password", type="password")
         submitted = st.form_submit_button("Enter the list", use_container_width=True)
         if submitted:
@@ -32,7 +58,7 @@ if not st.session_state.get("signed_in", False):
                 st.rerun()
             else:
                 st.error("That password didn't match. Please try again.")
-    st.info("Ask the person managing the app for the shared password.")
+    st.markdown("<div class='dd-note'>🌼 Ask the person managing the list for your shared password, then come on in.</div>", unsafe_allow_html=True)
     st.stop()
 
 @st.cache_resource
@@ -43,7 +69,14 @@ supabase = get_client()
 CATEGORIES = ["Hiking", "Day trips", "Camping", "Other"]
 STATUSES = ["Want to go", "Planned", "Completed"]
 DIFFICULTIES = ["Easy", "Moderate", "Hard", "Very hard", "Not applicable", "Unknown"]
-FIELDS = ["name", "category", "location", "distance_km", "difficulty", "status", "notes", "map_url", "latitude", "longitude"]
+FIELDS = ["name", "category", "location", "distance_km", "elevation_gain_m", "difficulty", "status", "notes", "map_url", "latitude", "longitude"]
+CATEGORY_ART = {
+    "Hiking": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=85",
+    "Day trips": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=700&q=85",
+    "Camping": "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=700&q=85",
+    "Other": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=85",
+}
+CATEGORY_EMOJI = {"Hiking": "🥾", "Day trips": "🚙", "Camping": "🏕️", "Other": "🌼"}
 
 def load_adventures():
     result = supabase.table("adventures").select("*").order("name").execute()
@@ -74,7 +107,7 @@ with st.sidebar:
     categories = st.multiselect("Adventure type", CATEGORIES, default=[])
     statuses = st.multiselect("Status", STATUSES, default=[])
     difficulties = st.multiselect("Difficulty", DIFFICULTIES, default=[])
-    sort_by = st.selectbox("Sort by", ["Name (A–Z)", "Name (Z–A)", "Distance (shortest)", "Distance (longest)", "Recently added"])
+    sort_by = st.selectbox("Sort by", ["Name (A–Z)", "Name (Z–A)", "Distance (shortest)", "Distance (longest)", "Elevation gain (lowest)", "Elevation gain (highest)", "Recently added"])
     st.divider()
     if st.button("↻ Refresh list", use_container_width=True):
         st.rerun()
@@ -102,6 +135,12 @@ if not df.empty:
         filtered = filtered.sort_values("distance_km", na_position="last")
     elif sort_by == "Distance (longest)":
         filtered = filtered.sort_values("distance_km", ascending=False, na_position="last")
+    elif sort_by == "Elevation gain (lowest)":
+        if "elevation_gain_m" in filtered.columns:
+            filtered = filtered.sort_values("elevation_gain_m", na_position="last")
+    elif sort_by == "Elevation gain (highest)":
+        if "elevation_gain_m" in filtered.columns:
+            filtered = filtered.sort_values("elevation_gain_m", ascending=False, na_position="last")
     elif sort_by == "Recently added" and "created_at" in filtered.columns:
         filtered = filtered.sort_values("created_at", ascending=False)
 else:
@@ -116,36 +155,45 @@ with tab_list:
     c1.metric("All adventures", total)
     c2.metric("Showing", shown)
     c3.metric("Completed", int((df["status"] == "Completed").sum()) if not df.empty and "status" in df.columns else 0)
-    st.subheader("Your adventures")
+    st.markdown("<div class='dd-section'>✿ Your adventure scrapbook</div>", unsafe_allow_html=True)
     if filtered.empty:
         st.info("No adventures match these filters yet. Add one in the 'Add adventure' tab, or clear your filters.")
     else:
         for _, row in filtered.iterrows():
             with st.container(border=True):
-                top1, top2 = st.columns([4, 1])
+                picture, content = st.columns([1, 3], gap="medium")
+                category_name = row.get("category") or "Other"
+                picture.image(CATEGORY_ART.get(category_name, CATEGORY_ART["Other"]), use_container_width=True)
+                picture.caption(f"{CATEGORY_EMOJI.get(category_name, '🌼')} {category_name.upper()}")
+                top1, top2 = content.columns([4, 1])
                 top1.markdown(f"### {row.get('name') or 'Untitled adventure'}")
-                top1.caption(f"{row.get('category') or 'Other'}  ·  {row.get('location') or 'Location not set'}")
-                top2.write(row.get("status") or "Want to go")
+                top1.caption(f"📍 {row.get('location') or 'Location not set'}")
+                status_value = row.get("status") or "Want to go"
+                status_icon = {"Want to go": "✦", "Planned": "◷", "Completed": "✓"}.get(status_value, "✦")
+                top2.markdown(f"**{status_icon} {status_value}**")
                 details = []
                 if pd.notna(row.get("distance_km")):
-                    details.append(f"**Distance:** {row.get('distance_km')} km")
+                    details.append(f"🥾 {row.get('distance_km')} km")
+                if pd.notna(row.get("elevation_gain_m")):
+                    details.append(f"↗ {float(row.get('elevation_gain_m')):g} m elevation gain")
                 if row.get("difficulty"):
-                    details.append(f"**Difficulty:** {row.get('difficulty')}")
+                    details.append(f"⛰️ {row.get('difficulty')}")
                 if details:
-                    st.markdown("  ·  ".join(details))
+                    content.markdown(" · ".join(details))
                 if row.get("notes"):
-                    st.write(row.get("notes"))
+                    content.markdown(f"<div class='dd-note'>✿ {row.get('notes')}</div>", unsafe_allow_html=True)
                 if row.get("map_url"):
-                    st.markdown(f"[Open map or website ↗]({row.get('map_url')})")
+                    content.markdown(f"[Open map or website ↗]({row.get('map_url')})")
                 elif row.get("location"):
                     query = quote(str(row.get("location")))
-                    st.markdown(f"[Find on Google Maps ↗](https://www.google.com/maps/search/?api=1&query={query})")
-                with st.expander("Edit this adventure"):
+                    content.markdown(f"[Find on Google Maps ↗](https://www.google.com/maps/search/?api=1&query={query})")
+                with st.expander("✎ Edit this adventure"):
                     with st.form(f"edit_{row['id']}"):
                         name = st.text_input("Adventure name", value=clean_text(row.get("name", "")))
                         category = st.selectbox("Adventure type", CATEGORIES, index=CATEGORIES.index(row["category"]) if row.get("category") in CATEGORIES else 0)
                         location = st.text_input("Location", value=clean_text(row.get("location", "")))
                         distance = st.number_input("Distance (km; use 0 if not applicable)", min_value=0.0, value=float(row["distance_km"]) if pd.notna(row.get("distance_km")) else 0.0, step=0.5)
+                        elevation_gain = st.number_input("Elevation gain (metres; 0 if unknown)", min_value=0, value=int(float(row["elevation_gain_m"])) if pd.notna(row.get("elevation_gain_m")) else 0, step=25)
                         difficulty = st.selectbox("Difficulty", DIFFICULTIES, index=DIFFICULTIES.index(row["difficulty"]) if row.get("difficulty") in DIFFICULTIES else 5)
                         status = st.selectbox("Status", STATUSES, index=STATUSES.index(row["status"]) if row.get("status") in STATUSES else 0)
                         notes = st.text_area("Notes", value=clean_text(row.get("notes", "")))
@@ -160,7 +208,7 @@ with tab_list:
                         else:
                             save_adventure({
                                 "name": name.strip(), "category": category, "location": location.strip(),
-                                "distance_km": distance if distance > 0 else None, "difficulty": difficulty,
+                                "distance_km": distance if distance > 0 else None, "elevation_gain_m": elevation_gain if elevation_gain > 0 else None, "difficulty": difficulty,
                                 "status": status, "notes": notes.strip(), "map_url": map_url.strip(),
                                 "latitude": latitude if latitude != 0 else None,
                                 "longitude": longitude if longitude != 0 else None
@@ -181,7 +229,7 @@ with tab_list:
                             st.rerun()
 
 with tab_map:
-    st.subheader("Adventure map")
+    st.markdown("<div class='dd-section'>✹ The wander map</div>", unsafe_allow_html=True)
     st.caption("Map pins appear for adventures with latitude and longitude saved. You can add coordinates while adding or editing an adventure.")
     if not df.empty and {"latitude", "longitude"}.issubset(df.columns):
         mapped = df.dropna(subset=["latitude", "longitude"]).copy()
@@ -197,14 +245,15 @@ with tab_map:
         st.info("Your map will appear here once you add adventures with coordinates.")
 
 with tab_add:
-    st.subheader("Add an adventure")
+    st.markdown("<div class='dd-section'>✦ Pin a new adventure</div>", unsafe_allow_html=True)
     with st.form("add_form", clear_on_submit=True):
         name = st.text_input("Adventure name *", placeholder="e.g. Lynn Canyon Loop")
         category = st.selectbox("Adventure type", CATEGORIES)
         location = st.text_input("Location", placeholder="e.g. North Vancouver, BC")
         col1, col2 = st.columns(2)
         distance = col1.number_input("Distance in km (0 if not applicable)", min_value=0.0, value=0.0, step=0.5)
-        difficulty = col2.selectbox("Difficulty", DIFFICULTIES)
+        elevation_gain = col2.number_input("Elevation gain in metres (0 if unknown)", min_value=0, value=0, step=25)
+        difficulty = st.selectbox("Difficulty", DIFFICULTIES)
         status = st.selectbox("Status", STATUSES)
         notes = st.text_area("Notes", placeholder="Parking, best time to go, things to bring...")
         map_url = st.text_input("Website or map link", placeholder="https://...")
@@ -220,7 +269,7 @@ with tab_add:
             try:
                 save_adventure({
                     "name": name.strip(), "category": category, "location": location.strip(),
-                    "distance_km": distance if distance > 0 else None, "difficulty": difficulty,
+                    "distance_km": distance if distance > 0 else None, "elevation_gain_m": elevation_gain if elevation_gain > 0 else None, "difficulty": difficulty,
                     "status": status, "notes": notes.strip(), "map_url": map_url.strip(),
                     "latitude": latitude if latitude != 0 else None,
                     "longitude": longitude if longitude != 0 else None
@@ -232,7 +281,7 @@ with tab_add:
                 st.code(str(exc))
 
 with tab_import:
-    st.subheader("Bring in your existing hiking list")
+    st.markdown("<div class='dd-section'>✿ Bring your old list along</div>", unsafe_allow_html=True)
     st.write("Upload your Excel (.xlsx) or CSV file. The importer will show a preview and let you match your spreadsheet columns to the app fields.")
     uploaded = st.file_uploader("Choose your hiking list", type=["xlsx", "csv"])
     if uploaded:
@@ -247,6 +296,7 @@ with tab_import:
                 "category": ["category", "type", "activity"],
                 "location": ["location", "area", "region", "city"],
                 "distance_km": ["distance_km", "distance", "length", "km"],
+                "elevation_gain_m": ["elevation_gain_m", "elevation gain", "elevation_gain", "elevation", "gain (m)", "elevation gain (m)", "ascent", "ascent (m)"],
                 "difficulty": ["difficulty", "level"],
                 "status": ["status", "progress"],
                 "notes": ["notes", "description", "comments"],
@@ -255,7 +305,7 @@ with tab_import:
             st.write("Match your spreadsheet columns:")
             for field, label in [
                 ("name", "Adventure name *"), ("category", "Adventure type"), ("location", "Location"),
-                ("distance_km", "Distance (km)"), ("difficulty", "Difficulty"), ("status", "Status"),
+                ("distance_km", "Distance (km)"), ("elevation_gain_m", "Elevation gain (m)"), ("difficulty", "Difficulty"), ("status", "Status"),
                 ("notes", "Notes"), ("map_url", "Website or map link")
             ]:
                 guess = next((c for c in source.columns if str(c).strip().lower() in defaults[field]), "(skip this field)")
@@ -284,10 +334,17 @@ with tab_import:
                             if distance_val <= 0: distance_val = None
                         except Exception:
                             distance_val = None
+                    elevation_val = None
+                    if mappings["elevation_gain_m"] != "(skip this field)":
+                        try:
+                            elevation_val = float(str(rec.get(mappings["elevation_gain_m"], "")).replace(",", "."))
+                            if elevation_val <= 0: elevation_val = None
+                        except Exception:
+                            elevation_val = None
                     values = {
                         "name": clean_text(rec.get(name_col, "")), "category": cat_val,
                         "location": clean_text(rec.get(mappings["location"], "")) if mappings["location"] != "(skip this field)" else "",
-                        "distance_km": distance_val, "difficulty": diff_val, "status": status_val,
+                        "distance_km": distance_val, "elevation_gain_m": elevation_val, "difficulty": diff_val, "status": status_val,
                         "notes": clean_text(rec.get(mappings["notes"], "")) if mappings["notes"] != "(skip this field)" else "",
                         "map_url": clean_text(rec.get(mappings["map_url"], "")) if mappings["map_url"] != "(skip this field)" else ""
                     }

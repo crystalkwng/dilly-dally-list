@@ -296,7 +296,6 @@ with tab_list:
                     content.markdown(" · ".join(details))
                 if row.get("notes"):
                     content.markdown(f"<div class='dd-note'>✿ {row.get('notes')}</div>", unsafe_allow_html=True)
-              st.write("") 
               if row.get("map_url"):
                     content.markdown(f"[The Finer Details ↗]({row.get('map_url')})")
                 elif row.get("location"):

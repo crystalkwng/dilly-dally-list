@@ -6,32 +6,14 @@ from urllib.parse import quote
 
 st.set_page_config(page_title="The Dilly Dally List", page_icon="🧭", layout="wide")
 
-# Choose a font pairing in the sidebar. The selected pairing applies across the whole app.
-FONT_STYLES = {
-    "Playful retro": {
-        "heading": "'Fredoka', sans-serif",
-        "body": "'DM Sans', sans-serif",
-        "description": "Rounded, cheerful, friendly",
-    },
-    "Vintage field guide": {
-        "heading": "'Bree Serif', Georgia, serif",
-        "body": "'Nunito Sans', sans-serif",
-        "description": "Outdoorsy, warm, classic",
-    },
-    "Groovy 70s": {
-        "heading": "'Righteous', sans-serif",
-        "body": "'DM Sans', sans-serif",
-        "description": "Bold, funky, nostalgic",
-    },
-}
-st.session_state.setdefault("font_style", "Playful retro")
-selected_fonts = FONT_STYLES.get(st.session_state["font_style"], FONT_STYLES["Playful retro"])
+# Vintage field guide typography is used consistently throughout the entire app.
+VINTAGE_HEADING_FONT = "'Bree Serif', Georgia, serif"
+VINTAGE_BODY_FONT = "'Nunito Sans', sans-serif"
 
-# Load all three Google Fonts pairings so switching styles is quick.
-st.markdown(f"""
+st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&family=Righteous&display=swap');
-:root {{ --heading-font: {selected_fonts['heading']}; --body-font: {selected_fonts['body']}; }}
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
+:root { --heading-font: 'Bree Serif', Georgia, serif; --body-font: 'Nunito Sans', sans-serif; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -42,12 +24,28 @@ st.markdown("""
 .block-container {padding-top: 1.2rem; padding-bottom: 3rem; max-width: 1240px;}
 [data-testid="stSidebar"] {background: #E5EFE5; border-right: 2px solid #C5D8C8;}
 [data-testid="stSidebar"] h2, [data-testid="stSidebar"] label {color:var(--ink);}
-h1, h2, h3 {font-family:var(--heading-font) !important; color:var(--ink); letter-spacing:-.035em;}
-p, label, div, span, input, textarea, button, select {font-family:var(--body-font);}
+/* Apply the body font to Streamlit widgets, markdown, tables, forms and sidebar. */
+.stApp, .stApp *, [data-testid="stSidebar"], [data-testid="stSidebar"] *,
+[data-testid="stWidgetLabel"], [data-testid="stWidgetLabel"] *,
+[data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] *,
+[data-testid="stDataFrame"], [data-testid="stDataFrame"] *,
+[data-testid="stTable"], [data-testid="stTable"] *,
+input, textarea, button, select, option {
+  font-family: var(--body-font) !important;
+}
+h1, h2, h3, h4, h5, h6,
+[data-testid="stMarkdownContainer"] h1, [data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3, [data-testid="stMetricValue"],
+.dd-hero h1, .dd-section {
+  font-family: var(--heading-font) !important;
+  color: var(--ink);
+  letter-spacing: -.025em;
+}
+[data-testid="stCode"] *, code, pre {font-family: var(--body-font) !important;}
 [data-testid="stMetric"] {background:var(--paper); border:2px solid var(--ink); border-radius:16px; padding:15px 18px; box-shadow:4px 4px 0 #83B5D1;}
 [data-testid="stMetricLabel"] {color:#55745D; font-size:.8rem; text-transform:uppercase; letter-spacing:.08em;}
-[data-testid="stMetricValue"] {color:#7562A5; font-family:var(--heading-font);}
-[data-testid="stTabs"] button {font-family:var(--body-font); font-weight:600; border-radius:999px; padding:.55rem 1rem;}
+[data-testid="stMetricValue"] {color:#7562A5; font-family:var(--heading-font) !important;}
+[data-testid="stTabs"] button {font-family:var(--body-font) !important; font-weight:600; border-radius:999px; padding:.55rem 1rem;}
 [data-testid="stTabs"] button[aria-selected="true"] {background:#342D4F; color:#FFFDF9;}
 .stButton button, [data-testid="stFormSubmitButton"] button {border:2px solid #342D4F; border-radius:999px; font-weight:700; box-shadow:3px 3px 0 #83B5D1; transition:transform .15s ease;}
 .stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {transform:translate(-1px,-1px); border-color:#342D4F; box-shadow:4px 4px 0 #71977C;}
@@ -58,8 +56,8 @@ input, textarea, [data-baseweb="select"] > div {border-radius:10px !important;}
 .dd-hero h1 {font-size:clamp(2.2rem,5vw,4.1rem); line-height:.98; margin:.2rem 0 .55rem; color:#342D4F;}
 .dd-hero p {margin:0; max-width:620px; font-size:.94rem; line-height:1.65; color:#342D4F;}
 .dd-kicker {text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:700; color:#625286;}
-.dd-sticker {display:inline-block; border:2px solid #342D4F; border-radius:999px; background:#FFFDF9; padding:.28rem .65rem; margin:.7rem .25rem 0 0; font-family:var(--body-font); font-size:.7rem; font-weight:700; transform:rotate(-2deg);}
-.dd-section {font-family:var(--heading-font); font-size:1.65rem; font-weight:800; color:#342D4F; margin:.25rem 0 .7rem;}
+.dd-sticker {display:inline-block; border:2px solid #342D4F; border-radius:999px; background:#FFFDF9; padding:.28rem .65rem; margin:.7rem .25rem 0 0; font-family:var(--body-font) !important; font-size:.7rem; font-weight:700; transform:rotate(-2deg);}
+.dd-section {font-family:var(--heading-font) !important; font-size:1.65rem; font-weight:800; color:#342D4F; margin:.25rem 0 .7rem;}
 .dd-note {background:#E5EFE5; border-left:5px solid #71977C; padding:.8rem 1rem; border-radius:0 12px 12px 0; color:#342D4F;}
 @media (max-width: 700px) { .block-container {padding-left:1rem; padding-right:1rem;} .dd-hero {padding:1.1rem;} }
 </style>
@@ -210,31 +208,7 @@ except Exception as exc:
 
 with st.sidebar:
     st.header("Where to next?")
-    st.selectbox(
-        "Try a font style",
-        options=list(FONT_STYLES.keys()),
-        key="font_style",
-        help="Choose a pairing to change headings, body text, buttons, tabs, labels, and other app text.",
-    )
-    st.caption(FONT_STYLES[st.session_state["font_style"]]["description"])
-    with st.expander("Compare all 3 font samples"):
-        st.markdown("""
-        <div style="background:#FFFDF9;border:1px solid #D7CDE6;border-radius:12px;padding:12px;margin-bottom:8px;color:#342D4F;">
-          <div style="font:600 1.25rem 'Fredoka',sans-serif;">Playful retro</div>
-          <div style="font:400 .9rem 'DM Sans',sans-serif;">The Dilly Dally List</div>
-          <small>Rounded, cheerful, friendly</small>
-        </div>
-        <div style="background:#FFFDF9;border:1px solid #D7CDE6;border-radius:12px;padding:12px;margin-bottom:8px;color:#342D4F;">
-          <div style="font:400 1.25rem 'Bree Serif',serif;">Vintage field guide</div>
-          <div style="font:400 .9rem 'Nunito Sans',sans-serif;">The Dilly Dally List</div>
-          <small>Outdoorsy, warm, classic</small>
-        </div>
-        <div style="background:#FFFDF9;border:1px solid #D7CDE6;border-radius:12px;padding:12px;color:#342D4F;">
-          <div style="font:400 1.25rem 'Righteous',sans-serif;">Groovy 70s</div>
-          <div style="font:400 .9rem 'DM Sans',sans-serif;">The Dilly Dally List</div>
-          <small>Bold, funky, nostalgic</small>
-        </div>
-        """, unsafe_allow_html=True)
+    st.caption("Vintage field guide fonts · Bree Serif + Nunito Sans")
     st.divider()
     search = st.text_input("Search names, places, or notes", placeholder="Try 'waterfall'...")
     categories = st.multiselect("Adventure type", CATEGORIES, default=[])

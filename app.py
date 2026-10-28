@@ -9,30 +9,30 @@ st.set_page_config(page_title="The Dilly Dally List", page_icon="🧭", layout="
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap');
-:root { --cream:#fff7e7; --paper:#fffdf7; --ink:#243c36; --tomato:#d95e3f; --gold:#e9b949; --sage:#8b9c68; --pink:#e7a28d; }
-.stApp { background: #fff8eb; color: var(--ink); }
+:root { --cream:#F5F0FA; --paper:#FFFDF9; --ink:#342D4F; --tomato:#83B5D1; --gold:#A994D6; --sage:#71977C; --pink:#C4B5E2; }
+.stApp { background: var(--cream); color: var(--ink); }
 .block-container {padding-top: 1.2rem; padding-bottom: 3rem; max-width: 1240px;}
-[data-testid="stSidebar"] {background: #e9edda; border-right: 2px solid #d9dfc6;}
-[data-testid="stSidebar"] h2, [data-testid="stSidebar"] label {color:#243c36;}
-h1, h2, h3 {font-family:'Fraunces', Georgia, serif !important; color:#243c36; letter-spacing:-.035em;}
+[data-testid="stSidebar"] {background: #E5EFE5; border-right: 2px solid #C5D8C8;}
+[data-testid="stSidebar"] h2, [data-testid="stSidebar"] label {color:var(--ink);}
+h1, h2, h3 {font-family:'Fraunces', Georgia, serif !important; color:var(--ink); letter-spacing:-.035em;}
 p, label, div, span {font-family:'DM Mono', 'Trebuchet MS', sans-serif;}
-[data-testid="stMetric"] {background:#fffdf7; border:2px solid #243c36; border-radius:16px; padding:15px 18px; box-shadow:4px 4px 0 #e9b949;}
-[data-testid="stMetricLabel"] {color:#5b6b4d; font-size:.8rem; text-transform:uppercase; letter-spacing:.08em;}
-[data-testid="stMetricValue"] {color:#d95e3f; font-family:'Fraunces',Georgia,serif;}
+[data-testid="stMetric"] {background:var(--paper); border:2px solid var(--ink); border-radius:16px; padding:15px 18px; box-shadow:4px 4px 0 #83B5D1;}
+[data-testid="stMetricLabel"] {color:#55745D; font-size:.8rem; text-transform:uppercase; letter-spacing:.08em;}
+[data-testid="stMetricValue"] {color:#7562A5; font-family:'Fraunces',Georgia,serif;}
 [data-testid="stTabs"] button {font-family:'DM Mono',monospace; font-weight:600; border-radius:999px; padding:.55rem 1rem;}
-[data-testid="stTabs"] button[aria-selected="true"] {background:#243c36; color:#fff7e7;}
-.stButton button, [data-testid="stFormSubmitButton"] button {border:2px solid #243c36; border-radius:999px; font-weight:700; box-shadow:3px 3px 0 #e9b949; transition:transform .15s ease;}
-.stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {transform:translate(-1px,-1px); border-color:#243c36; box-shadow:4px 4px 0 #d95e3f;}
-[data-testid="stForm"] {background:#fffdf7; border:2px solid #d9dfc6; border-radius:18px; padding:1.1rem;}
-[data-testid="stExpander"] {background:#fffdf7; border:1px solid #d9dfc6; border-radius:12px;}
+[data-testid="stTabs"] button[aria-selected="true"] {background:#342D4F; color:#FFFDF9;}
+.stButton button, [data-testid="stFormSubmitButton"] button {border:2px solid #342D4F; border-radius:999px; font-weight:700; box-shadow:3px 3px 0 #83B5D1; transition:transform .15s ease;}
+.stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {transform:translate(-1px,-1px); border-color:#342D4F; box-shadow:4px 4px 0 #71977C;}
+[data-testid="stForm"] {background:var(--paper); border:2px solid #D7CDE6; border-radius:18px; padding:1.1rem;}
+[data-testid="stExpander"] {background:var(--paper); border:1px solid #D7CDE6; border-radius:12px;}
 input, textarea, [data-baseweb="select"] > div {border-radius:10px !important;}
-.dd-hero {background:#f2c85b; border:3px solid #243c36; border-radius:24px; padding:1.35rem 1.5rem; margin:.1rem 0 1.2rem; box-shadow:7px 7px 0 #d95e3f; position:relative; overflow:hidden;}
-.dd-hero h1 {font-size:clamp(2.2rem,5vw,4.1rem); line-height:.98; margin:.2rem 0 .55rem; color:#243c36;}
-.dd-hero p {margin:0; max-width:620px; font-size:.94rem; line-height:1.65; color:#243c36;}
-.dd-kicker {text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:700; color:#d95e3f;}
-.dd-sticker {display:inline-block; border:2px solid #243c36; border-radius:999px; background:#fff7e7; padding:.28rem .65rem; margin:.7rem .25rem 0 0; font-family:'DM Mono',monospace; font-size:.7rem; font-weight:700; transform:rotate(-2deg);}
-.dd-section {font-family:'Fraunces',Georgia,serif; font-size:1.65rem; font-weight:800; color:#243c36; margin:.25rem 0 .7rem;}
-.dd-note {background:#e9edda; border-left:5px solid #8b9c68; padding:.8rem 1rem; border-radius:0 12px 12px 0; color:#243c36;}
+.dd-hero {background:#D8CBEF; border:3px solid #342D4F; border-radius:24px; padding:1.35rem 1.5rem; margin:.1rem 0 1.2rem; box-shadow:7px 7px 0 #83B5D1; position:relative; overflow:hidden;}
+.dd-hero h1 {font-size:clamp(2.2rem,5vw,4.1rem); line-height:.98; margin:.2rem 0 .55rem; color:#342D4F;}
+.dd-hero p {margin:0; max-width:620px; font-size:.94rem; line-height:1.65; color:#342D4F;}
+.dd-kicker {text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:700; color:#625286;}
+.dd-sticker {display:inline-block; border:2px solid #342D4F; border-radius:999px; background:#FFFDF9; padding:.28rem .65rem; margin:.7rem .25rem 0 0; font-family:'DM Mono',monospace; font-size:.7rem; font-weight:700; transform:rotate(-2deg);}
+.dd-section {font-family:'Fraunces',Georgia,serif; font-size:1.65rem; font-weight:800; color:#342D4F; margin:.25rem 0 .7rem;}
+.dd-note {background:#E5EFE5; border-left:5px solid #71977C; padding:.8rem 1rem; border-radius:0 12px 12px 0; color:#342D4F;}
 @media (max-width: 700px) { .block-container {padding-left:1rem; padding-right:1rem;} .dd-hero {padding:1.1rem;} }
 </style>
 <div class="dd-hero">
@@ -272,8 +272,8 @@ with tab_list:
                 if pd.notna(lat_value) and pd.notna(lon_value) and lat_value != 0 and lon_value != 0:
                     directions_url = f"https://www.google.com/maps/dir/?api=1&destination={lat_value:.6f}%2C{lon_value:.6f}&travelmode=driving"
                     content.markdown(f"[🚗 Directions↗]({directions_url})")
-                with st.expander("📎 Important files & info", expanded=False):
-                    st.caption("GPX routes, PDFs, packing lists, permits, etc. Maximum upload size: 25 MB per file.")
+                with st.expander("📎 Attachments & important files", expanded=False):
+                    st.caption("Keep GPX routes, PDFs, packing lists, permits, and other files with this adventure. Maximum upload size: 25 MB per file.")
                     if not attachments_table_ready:
                         st.warning("Attachments need a one-time Supabase setup before they can be used. Run the add_adventure_attachments.sql file included in this project ZIP in Supabase SQL Editor, then refresh this app.")
                     else:
@@ -298,7 +298,7 @@ with tab_list:
                             "Add a file",
                             type=ATTACHMENT_TYPES,
                             key=f"attachment_upload_{row['id']}",
-                            help="Supported examples: GPX, PDF, Word, Excel, CSV, text, ZIP, etc.",
+                            help="Supported examples: GPX, PDF, Word, Excel, CSV, text, ZIP, KML, KMZ, TCX, and common image files.",
                         )
                         if st.button("Upload attachment", key=f"upload_attachment_{row['id']}", use_container_width=True, disabled=new_attachment is None):
                             try:
@@ -434,8 +434,8 @@ with tab_map:
                 get_radius=180,
                 radius_min_pixels=7,
                 radius_max_pixels=18,
-                get_fill_color=[217, 94, 63, 220],
-                get_line_color=[36, 60, 54, 255],
+                get_fill_color=[131, 181, 209, 220],
+                get_line_color=[52, 45, 79, 255],
                 line_width_min_pixels=2,
                 stroked=True,
                 pickable=True,
@@ -445,7 +445,7 @@ with tab_map:
             deck = pdk.Deck(
                 layers=[pin_layer],
                 initial_view_state=view_state,
-                tooltip={"html": "<b>{name}</b><br/>{location}<br/>{category} · {status}", "style": {"backgroundColor": "#fffdf7", "color": "#243c36"}},
+                tooltip={"html": "<b>{name}</b><br/>{location}<br/>{category} · {status}", "style": {"backgroundColor": "#FFFDF9", "color": "#342D4F"}},
                 map_style="light",
             )
             map_event = st.pydeck_chart(

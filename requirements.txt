@@ -2,3 +2,4 @@ streamlit>=1.40,<2.0
 supabase>=2.10,<3.0
 pandas>=2.0,<3.0
 openpyxl>=3.1,<4.0
+pydeck>=0.9.1,<1.0

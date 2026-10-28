@@ -38,8 +38,8 @@ input, textarea, [data-baseweb="select"] > div {border-radius:10px !important;}
 <div class="dd-hero">
   <div class="dd-kicker">✳ collect moments, not things ✳</div>
   <h1>The Dilly Dally List</h1>
-  <p>Don’t adventures ever have an end? I suppose not. Someone else always has to carry on the story – Bilbo Baggins</p>
-  <span class="dd-sticker">✿ JUST DILLY DALLYING</span><span class="dd-sticker">★ OUT THERE SOMEWHERE</span>
+  <p>A little retro field guide for big fresh-air energy, spontaneous road trips, campfire nights, and places worth taking the long way to.</p>
+  <span class="dd-sticker">✿ TAKE THE SCENIC ROUTE</span><span class="dd-sticker">★ OUT THERE SOMEWHERE</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -186,7 +186,7 @@ with tab_list:
     c1.metric("All adventures", total)
     c2.metric("Showing", shown)
     c3.metric("Completed", int((df["status"] == "Completed").sum()) if not df.empty and "status" in df.columns else 0)
-    st.markdown("<div class='dd-section'>✿ Off to adventure</div>", unsafe_allow_html=True)
+    st.markdown("<div class='dd-section'>✿ Your adventure scrapbook</div>", unsafe_allow_html=True)
     if filtered.empty:
         st.info("No adventures match these filters yet. Add one in the 'Add adventure' tab, or clear your filters.")
     else:
@@ -219,6 +219,11 @@ with tab_list:
                 elif row.get("location"):
                     query = quote(str(row.get("location")))
                     content.markdown(f"[Find on Google Maps ↗](https://www.google.com/maps/search/?api=1&query={query})")
+                lat_value = pd.to_numeric(pd.Series([row.get("latitude")]), errors="coerce").iloc[0]
+                lon_value = pd.to_numeric(pd.Series([row.get("longitude")]), errors="coerce").iloc[0]
+                if pd.notna(lat_value) and pd.notna(lon_value) and lat_value != 0 and lon_value != 0:
+                    directions_url = f"https://www.google.com/maps/dir/?api=1&destination={lat_value:.6f}%2C{lon_value:.6f}&travelmode=driving"
+                    content.markdown(f"[🚗 Get directions in Google Maps ↗]({directions_url})")
                 action_col, spacer_col = content.columns([1, 5])
                 if action_col.button("✎ Edit adventure", key=f"edit_toggle_{row['id']}", use_container_width=True):
                     current_edit = st.session_state.get("editing_adventure")
@@ -304,14 +309,100 @@ with tab_list:
 
 with tab_map:
     st.markdown("<div class='dd-section'>✹ The wander map</div>", unsafe_allow_html=True)
-    st.caption("Map pins appear for adventures with latitude and longitude saved. You can add coordinates while adding or editing an adventure.")
+    st.caption("Click a map pin to see that adventure’s details. Use the directions link to navigate there in Google Maps.")
     if not df.empty and {"latitude", "longitude"}.issubset(df.columns):
-        mapped = df.dropna(subset=["latitude", "longitude"]).copy()
+        mapped = df.copy()
+        mapped["latitude"] = pd.to_numeric(mapped["latitude"], errors="coerce")
+        mapped["longitude"] = pd.to_numeric(mapped["longitude"], errors="coerce")
+        mapped = mapped.dropna(subset=["latitude", "longitude"])
         mapped = mapped[(mapped["latitude"] != 0) & (mapped["longitude"] != 0)]
         if not mapped.empty:
-            mapped = mapped.rename(columns={"latitude": "lat", "longitude": "lon"})
-            st.map(mapped[["lat", "lon"]], size=80)
-            st.dataframe(mapped[[c for c in ["name", "category", "location", "status"] if c in mapped.columns]], use_container_width=True, hide_index=True)
+            map_data = pd.DataFrame({
+                "adventure_id": mapped["id"].astype(str),
+                "name": mapped["name"].fillna("Untitled adventure").astype(str),
+                "location": mapped["location"].fillna("").astype(str) if "location" in mapped.columns else "",
+                "category": mapped["category"].fillna("Other").astype(str) if "category" in mapped.columns else "Other",
+                "status": mapped["status"].fillna("Want to go").astype(str) if "status" in mapped.columns else "Want to go",
+                "lat": mapped["latitude"],
+                "lon": mapped["longitude"],
+            })
+            import pydeck as pdk
+
+            view_state = pdk.ViewState(
+                latitude=float(map_data["lat"].mean()),
+                longitude=float(map_data["lon"].mean()),
+                zoom=7 if len(map_data) > 1 else 10,
+                pitch=0,
+            )
+            pin_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=map_data,
+                get_position="[lon, lat]",
+                get_radius=180,
+                radius_min_pixels=7,
+                radius_max_pixels=18,
+                get_fill_color=[217, 94, 63, 220],
+                get_line_color=[36, 60, 54, 255],
+                line_width_min_pixels=2,
+                stroked=True,
+                pickable=True,
+                auto_highlight=True,
+                id="adventure-pins",
+            )
+            deck = pdk.Deck(
+                layers=[pin_layer],
+                initial_view_state=view_state,
+                tooltip={"html": "<b>{name}</b><br/>{location}<br/>{category} · {status}", "style": {"backgroundColor": "#fffdf7", "color": "#243c36"}},
+                map_style="light",
+            )
+            map_event = st.pydeck_chart(
+                deck,
+                use_container_width=True,
+                on_select="rerun",
+                selection_mode="single-object",
+                key="adventure_map",
+            )
+            # Save the clicked pin's ID so its details remain visible after Streamlit reruns.
+            try:
+                selection = map_event.selection
+                selected_objects = selection.get("objects", {}) if hasattr(selection, "get") else {}
+                for layer_objects in selected_objects.values():
+                    if layer_objects:
+                        clicked_id = str(layer_objects[0].get("adventure_id", ""))
+                        if clicked_id:
+                            st.session_state["selected_map_adventure_id"] = clicked_id
+                        break
+            except (AttributeError, TypeError, KeyError, IndexError):
+                pass
+
+            selected_id = st.session_state.get("selected_map_adventure_id")
+            selected_rows = mapped[mapped["id"].astype(str) == str(selected_id)] if selected_id else mapped.iloc[0:0]
+            if not selected_rows.empty:
+                selected_row = selected_rows.iloc[0]
+                st.markdown("### ✦ Selected adventure")
+                selected_photo = clean_text(selected_row.get("photo_url", ""))
+                if selected_photo:
+                    st.image(selected_photo, width=320)
+                st.subheader(clean_text(selected_row.get("name", "")) or "Untitled adventure")
+                if clean_text(selected_row.get("location", "")):
+                    st.caption(f"📍 {clean_text(selected_row.get('location', ''))}")
+                selected_details = []
+                if pd.notna(selected_row.get("distance_km")):
+                    selected_details.append(f"🥾 {selected_row.get('distance_km')} km")
+                if pd.notna(selected_row.get("elevation_gain_m")):
+                    selected_details.append(f"↗ {float(selected_row.get('elevation_gain_m')):g} m elevation gain")
+                if clean_text(selected_row.get("difficulty", "")):
+                    selected_details.append(f"⛰️ {clean_text(selected_row.get('difficulty', ''))}")
+                if selected_details:
+                    st.write(" · ".join(selected_details))
+                if clean_text(selected_row.get("notes", "")):
+                    st.markdown(f"<div class='dd-note'>✿ {clean_text(selected_row.get('notes', ''))}</div>", unsafe_allow_html=True)
+                directions_url = f"https://www.google.com/maps/dir/?api=1&destination={float(selected_row['latitude']):.6f}%2C{float(selected_row['longitude']):.6f}&travelmode=driving"
+                st.markdown(f"[🚗 Get directions to this adventure in Google Maps ↗]({directions_url})")
+                if st.button("✎ Edit this adventure", key=f"map_edit_{selected_id}"):
+                    st.session_state["editing_adventure"] = str(selected_id)
+                    st.info("Open the Adventures tab to edit the selected entry.")
+            st.caption(f"{len(map_data)} adventure(s) with coordinates. Click a pin to select an adventure.")
         else:
             st.info("No map coordinates saved yet. Add latitude and longitude to an adventure to show it here.")
             st.markdown("[Find coordinates with Google Maps](https://support.google.com/maps/answer/18539)")

@@ -68,7 +68,7 @@ def get_client():
 supabase = get_client()
 CATEGORIES = ["Hiking", "Day trips", "Road trips", "Camping", "Biking", "Other"]
 STATUSES = ["Want to go", "Planned", "Completed"]
-DIFFICULTIES = ["Easy", "Moderate", "Hard", "Very hard", "Not applicable", "Unknown"]
+DIFFICULTIES = ["Easy", "Moderate", "Hard", "Strenous", "Not applicable", "Unknown"]
 FIELDS = ["name", "category", "location", "distance_km", "elevation_gain_m", "difficulty", "status", "notes", "map_url", "latitude", "longitude"]
 CATEGORY_ART = {
     "Hiking": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=85",

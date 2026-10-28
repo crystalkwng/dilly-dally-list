@@ -186,7 +186,7 @@ with tab_list:
     c1.metric("All adventures", total)
     c2.metric("Showing", shown)
     c3.metric("Completed", int((df["status"] == "Completed").sum()) if not df.empty and "status" in df.columns else 0)
-    st.markdown("<div class='dd-section'>✿ Your adventure scrapbook</div>", unsafe_allow_html=True)
+    st.markdown("<div class='dd-section'>✿ What's the next adventure?</div>", unsafe_allow_html=True)
     if filtered.empty:
         st.info("No adventures match these filters yet. Add one in the 'Add adventure' tab, or clear your filters.")
     else:

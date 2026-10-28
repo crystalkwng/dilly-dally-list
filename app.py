@@ -50,16 +50,16 @@ if "APP_PASSWORD" not in st.secrets or "SUPABASE_URL" not in st.secrets or "SUPA
 
 if not st.session_state.get("signed_in", False):
     with st.form("login_form"):
-        st.subheader("Welcome, dilly-dallier! ✿")
-        password = st.text_input("Shared app password", type="password")
+        st.subheader("Where to next? ✿")
+        password = st.text_input("Passowrd please", type="password")
         submitted = st.form_submit_button("Enter the list", use_container_width=True)
         if submitted:
             if password == st.secrets["APP_PASSWORD"]:
                 st.session_state["signed_in"] = True
                 st.rerun()
             else:
-                st.error("That password didn't match. Please try again.")
-    st.markdown("<div class='dd-note'>🌼 Ask the person managing the list for your shared password, then come on in.</div>", unsafe_allow_html=True)
+                st.error("Error, wrong password. It's not that hard.")
+    st.markdown("<div class='dd-note'>🌼 no password, no bueno.</div>", unsafe_allow_html=True)
     st.stop()
 
 @st.cache_resource
@@ -133,7 +133,7 @@ except Exception as exc:
     st.stop()
 
 with st.sidebar:
-    st.header("Find an adventure")
+    st.header("Where to next?")
     search = st.text_input("Search names, places, or notes", placeholder="Try 'waterfall'...")
     categories = st.multiselect("Adventure type", CATEGORIES, default=[])
     statuses = st.multiselect("Status", STATUSES, default=[])
@@ -308,7 +308,7 @@ with tab_list:
                         st.rerun()
 
 with tab_map:
-    st.markdown("<div class='dd-section'>✹ The wander map</div>", unsafe_allow_html=True)
+    st.markdown("<div class='dd-section'>✹ Wandering about</div>", unsafe_allow_html=True)
     st.caption("Click a map pin to see that adventure’s details. Use the directions link to navigate there in Google Maps.")
     if not df.empty and {"latitude", "longitude"}.issubset(df.columns):
         mapped = df.copy()

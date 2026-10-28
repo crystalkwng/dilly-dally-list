@@ -36,7 +36,7 @@ input, textarea, [data-baseweb="select"] > div {border-radius:10px !important;}
 @media (max-width: 700px) { .block-container {padding-left:1rem; padding-right:1rem;} .dd-hero {padding:1.1rem;} }
 </style>
 <div class="dd-hero">
-  <div class="dd-kicker">✳ collect moments, not things ✳</div>
+  <div class="dd-kicker">✳ wandering aimelessly ✳</div>
   <h1>The Dilly Dally List</h1>
   <p>Don't adventures ever have an end? I suppose not. - Bilbo Baggins</p>
   <span class="dd-sticker">✿ JUST DILLY DALLYING</span><span class="dd-sticker">★ OUT THERE SOMEWHERE</span>
@@ -51,7 +51,7 @@ if "APP_PASSWORD" not in st.secrets or "SUPABASE_URL" not in st.secrets or "SUPA
 if not st.session_state.get("signed_in", False):
     with st.form("login_form"):
         st.subheader("Where to next? ✿")
-        password = st.text_input("Passowrd please", type="password")
+        password = st.text_input("Password please", type="password")
         submitted = st.form_submit_button("Enter the list", use_container_width=True)
         if submitted:
             if password == st.secrets["APP_PASSWORD"]:

@@ -272,8 +272,8 @@ with tab_list:
                 if pd.notna(lat_value) and pd.notna(lon_value) and lat_value != 0 and lon_value != 0:
                     directions_url = f"https://www.google.com/maps/dir/?api=1&destination={lat_value:.6f}%2C{lon_value:.6f}&travelmode=driving"
                     content.markdown(f"[🚗 Directions↗]({directions_url})")
-                with st.expander("📎 Attachments & important files", expanded=False):
-                    st.caption("Keep GPX routes, PDFs, packing lists, permits, and other files with this adventure. Maximum upload size: 25 MB per file.")
+                with st.expander("📎 Important files & info", expanded=False):
+                    st.caption("GPX routes, PDFs, packing lists, permits, etc. Maximum upload size: 25 MB per file.")
                     if not attachments_table_ready:
                         st.warning("Attachments need a one-time Supabase setup before they can be used. Run the add_adventure_attachments.sql file included in this project ZIP in Supabase SQL Editor, then refresh this app.")
                     else:
@@ -298,7 +298,7 @@ with tab_list:
                             "Add a file",
                             type=ATTACHMENT_TYPES,
                             key=f"attachment_upload_{row['id']}",
-                            help="Supported examples: GPX, PDF, Word, Excel, CSV, text, ZIP, KML, KMZ, TCX, and common image files.",
+                            help="Supported examples: GPX, PDF, Word, Excel, CSV, text, ZIP, etc.",
                         )
                         if st.button("Upload attachment", key=f"upload_attachment_{row['id']}", use_container_width=True, disabled=new_attachment is None):
                             try:

@@ -120,6 +120,44 @@ def upload_adventure_photo(uploaded_file):
     )
     return supabase.storage.from_("adventure-photos").get_public_url(path)
 
+ATTACHMENT_BUCKET = "adventure-attachments"
+ATTACHMENT_TYPES = [
+    "gpx", "pdf", "doc", "docx", "xls", "xlsx", "csv", "txt",
+    "jpg", "jpeg", "png", "webp", "zip", "kml", "kmz", "tcx",
+    "geojson", "fit", "gpx.gz",
+]
+
+def upload_adventure_attachment(adventure_id, uploaded_file):
+    """Upload an attachment and save its metadata against an adventure."""
+    if uploaded_file is None:
+        return
+    if uploaded_file.size > 25 * 1024 * 1024:
+        raise ValueError("Please choose a file smaller than 25 MB.")
+
+    original_name = uploaded_file.name.replace("\\", "/").split("/")[-1].strip() or "attachment"
+    safe_name = "".join(ch if ch.isalnum() or ch in "._- " else "_" for ch in original_name).strip() or "attachment"
+    path = f"{uuid.uuid4().hex}_{safe_name}"
+    content_type = uploaded_file.type or "application/octet-stream"
+
+    supabase.storage.from_(ATTACHMENT_BUCKET).upload(
+        path, uploaded_file.getvalue(),
+        file_options={"content-type": content_type, "upsert": "false"},
+    )
+    public_url = supabase.storage.from_(ATTACHMENT_BUCKET).get_public_url(path)
+    supabase.table("adventure_attachments").insert({
+        "adventure_id": str(adventure_id),
+        "file_name": original_name,
+        "storage_path": path,
+        "public_url": public_url,
+        "content_type": content_type,
+        "file_size": uploaded_file.size,
+    }).execute()
+
+def delete_adventure_attachment(attachment):
+    """Delete a stored file and its metadata row."""
+    supabase.storage.from_(ATTACHMENT_BUCKET).remove([attachment["storage_path"]])
+    supabase.table("adventure_attachments").delete().eq("id", attachment["id"]).execute()
+
 def clean_text(value):
     if pd.isna(value):
         return ""
@@ -131,6 +169,16 @@ except Exception as exc:
     st.error("I couldn't connect to the database. Check your Supabase setup and secrets.")
     st.code(str(exc))
     st.stop()
+
+try:
+    attachment_result = supabase.table("adventure_attachments").select("*").order("created_at", desc=True).execute()
+    attachments_df = pd.DataFrame(attachment_result.data or [])
+    attachments_table_ready = True
+    attachments_setup_error = ""
+except Exception as exc:
+    attachments_df = pd.DataFrame()
+    attachments_table_ready = False
+    attachments_setup_error = str(exc)
 
 with st.sidebar:
     st.header("Where to next?")
@@ -224,6 +272,43 @@ with tab_list:
                 if pd.notna(lat_value) and pd.notna(lon_value) and lat_value != 0 and lon_value != 0:
                     directions_url = f"https://www.google.com/maps/dir/?api=1&destination={lat_value:.6f}%2C{lon_value:.6f}&travelmode=driving"
                     content.markdown(f"[🚗 Directions↗]({directions_url})")
+                with st.expander("📎 Attachments & important files", expanded=False):
+                    st.caption("Keep GPX routes, PDFs, packing lists, permits, and other files with this adventure. Maximum upload size: 25 MB per file.")
+                    if not attachments_table_ready:
+                        st.warning("Attachments need a one-time Supabase setup before they can be used. Run the add_adventure_attachments.sql file included in this project ZIP in Supabase SQL Editor, then refresh this app.")
+                    else:
+                        adventure_attachments = attachments_df[attachments_df["adventure_id"].astype(str) == str(row["id"])] if not attachments_df.empty and "adventure_id" in attachments_df.columns else pd.DataFrame()
+                        if adventure_attachments.empty:
+                            st.info("No files attached to this adventure yet.")
+                        else:
+                            for _, attachment in adventure_attachments.iterrows():
+                                file_col, remove_col = st.columns([5, 1])
+                                size_bytes = pd.to_numeric(pd.Series([attachment.get("file_size")]), errors="coerce").iloc[0]
+                                size_label = f" · {size_bytes / 1024:.0f} KB" if pd.notna(size_bytes) else ""
+                                file_col.markdown(f"📄 [{attachment.get('file_name', 'Download attachment')}]({attachment.get('public_url', '')}){size_label}")
+                                if remove_col.button("Remove", key=f"remove_attachment_{attachment['id']}"):
+                                    try:
+                                        delete_adventure_attachment(attachment.to_dict())
+                                        st.success("Attachment removed.")
+                                        st.rerun()
+                                    except Exception as exc:
+                                        st.error("Could not remove this attachment.")
+                                        st.code(str(exc))
+                        new_attachment = st.file_uploader(
+                            "Add a file",
+                            type=ATTACHMENT_TYPES,
+                            key=f"attachment_upload_{row['id']}",
+                            help="Supported examples: GPX, PDF, Word, Excel, CSV, text, ZIP, KML, KMZ, TCX, and common image files.",
+                        )
+                        if st.button("Upload attachment", key=f"upload_attachment_{row['id']}", use_container_width=True, disabled=new_attachment is None):
+                            try:
+                                upload_adventure_attachment(row["id"], new_attachment)
+                                st.success("File uploaded and saved with this adventure!")
+                                st.rerun()
+                            except Exception as exc:
+                                st.error("Could not upload this file. Check that the attachment bucket and table are set up.")
+                                st.code(str(exc))
+
                 action_col, spacer_col = content.columns([1, 5])
                 if action_col.button("✎ Edit adventure", key=f"edit_toggle_{row['id']}", use_container_width=True):
                     current_edit = st.session_state.get("editing_adventure")
@@ -298,6 +383,14 @@ with tab_list:
                     st.warning("Are you sure? This cannot be undone.")
                     yes, no = st.columns(2)
                     if yes.button("Yes, delete", key=f"yes_{row['id']}", type="primary"):
+                        # Remove this adventure's attachments from Storage and metadata first.
+                        if attachments_table_ready and not attachments_df.empty and "adventure_id" in attachments_df.columns:
+                            related_attachments = attachments_df[attachments_df["adventure_id"].astype(str) == str(row["id"])]
+                            for _, attachment in related_attachments.iterrows():
+                                try:
+                                    delete_adventure_attachment(attachment.to_dict())
+                                except Exception:
+                                    pass
                         supabase.table("adventures").delete().eq("id", row["id"]).execute()
                         st.session_state.pop("confirm_delete", None)
                         if st.session_state.get("editing_adventure") == str(row["id"]):
@@ -398,7 +491,7 @@ with tab_map:
                 if clean_text(selected_row.get("notes", "")):
                     st.markdown(f"<div class='dd-note'>✿ {clean_text(selected_row.get('notes', ''))}</div>", unsafe_allow_html=True)
                 directions_url = f"https://www.google.com/maps/dir/?api=1&destination={float(selected_row['latitude']):.6f}%2C{float(selected_row['longitude']):.6f}&travelmode=driving"
-                st.markdown(f"[🚗 Directions ↗]({directions_url})")
+                st.markdown(f"[🚗 Directions↗]({directions_url})")
                 if st.button("✎ Edit this adventure", key=f"map_edit_{selected_id}"):
                     st.session_state["editing_adventure"] = str(selected_id)
                     st.info("Open the Adventures tab to edit the selected entry.")

@@ -538,4 +538,4 @@ with tab_import:
             st.code(str(exc))
 
 st.divider()
-st.caption("Made for spontaneous plans and happy detours. Keep your shared password private.")
+st.caption("Made for spontaneous plans and happy detours, it's always fun to get a little lost.")

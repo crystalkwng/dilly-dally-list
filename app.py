@@ -223,7 +223,7 @@ with tab_list:
                 lon_value = pd.to_numeric(pd.Series([row.get("longitude")]), errors="coerce").iloc[0]
                 if pd.notna(lat_value) and pd.notna(lon_value) and lat_value != 0 and lon_value != 0:
                     directions_url = f"https://www.google.com/maps/dir/?api=1&destination={lat_value:.6f}%2C{lon_value:.6f}&travelmode=driving"
-                    content.markdown(f"[🚗 Get directions in Google Maps ↗]({directions_url})")
+                    content.markdown(f"[🚗 Directions↗]({directions_url})")
                 action_col, spacer_col = content.columns([1, 5])
                 if action_col.button("✎ Edit adventure", key=f"edit_toggle_{row['id']}", use_container_width=True):
                     current_edit = st.session_state.get("editing_adventure")

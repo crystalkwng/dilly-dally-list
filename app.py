@@ -55,7 +55,7 @@ h1, h2, h3, h4, h5, h6,
 [data-testid="stMetricValue"] {color:#7562A5; font-family:var(--heading-font) !important;}
 [data-testid="stTabs"] button {font-family:var(--body-font) !important; font-weight:600; border-radius:999px; padding:.55rem 1rem;}
 [data-testid="stTabs"] button[aria-selected="true"] {background:#342D4F; color:#FFFDF9;}
-.stButton button, [data-testid="stFormSubmitButton"] button {border:2px solid #342D4F; border-radius:999px; font-weight:700; box-shadow:3px 3px 0 #83B5D1; transition:transform .15s ease;}
+.stButton button, [data-testid="stFormSubmitButton"] button {border:2px solid #342D4F; border-radius:999px; font-weight:700; min-height:2.65rem; line-height:1.35; padding-top:.45rem; padding-bottom:.45rem; overflow:visible; box-shadow:3px 3px 0 #83B5D1; transition:transform .15s ease;}
 .stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {transform:translate(-1px,-1px); border-color:#342D4F; box-shadow:4px 4px 0 #71977C;}
 [data-testid="stForm"] {background:var(--paper); border:2px solid #D7CDE6; border-radius:18px; padding:1.1rem;}
 [data-testid="stExpander"] {background:var(--paper); border:1px solid #D7CDE6; border-radius:12px;}
@@ -216,6 +216,8 @@ except Exception as exc:
 
 with st.sidebar:
     st.header("Where to next?")
+    st.caption("Vintage field guide fonts · Bree Serif + Nunito Sans")
+    st.divider()
     search = st.text_input("Search names, places, or notes", placeholder="Try 'waterfall'...")
     categories = st.multiselect("Adventure type", CATEGORIES, default=[])
     statuses = st.multiselect("Status", STATUSES, default=[])
@@ -296,7 +298,7 @@ with tab_list:
                     content.markdown(" · ".join(details))
                 if row.get("notes"):
                     content.markdown(f"<div class='dd-note'>✿ {row.get('notes')}</div>", unsafe_allow_html=True)
-              if row.get("map_url"):
+                if row.get("map_url"):
                     content.markdown(f"[The Finer Details ↗]({row.get('map_url')})")
                 elif row.get("location"):
                     query = quote(str(row.get("location")))
@@ -344,7 +346,7 @@ with tab_list:
                                 st.code(str(exc))
 
                 action_col, spacer_col = content.columns([1, 5])
-                if action_col.button("✎ Edit adventure", key=f"edit_toggle_{row['id']}", use_container_width=True):
+                if action_col.button("✏️ Edit adventure", key=f"edit_toggle_{row['id']}", use_container_width=True):
                     current_edit = st.session_state.get("editing_adventure")
                     if current_edit == str(row["id"]):
                         st.session_state.pop("editing_adventure", None)
@@ -353,7 +355,7 @@ with tab_list:
                     st.rerun()
 
                 if st.session_state.get("editing_adventure") == str(row["id"]):
-                    st.markdown("#### ✎ Edit your adventure")
+                    st.markdown("#### ✏️ Edit your adventure")
                     st.caption("Make your changes below, then save. Your shared list will update for everyone.")
                     with st.form(f"edit_{row['id']}"):
                         name = st.text_input("Adventure name", value=clean_text(row.get("name", "")))
@@ -526,7 +528,7 @@ with tab_map:
                     st.markdown(f"<div class='dd-note'>✿ {clean_text(selected_row.get('notes', ''))}</div>", unsafe_allow_html=True)
                 directions_url = f"https://www.google.com/maps/dir/?api=1&destination={float(selected_row['latitude']):.6f}%2C{float(selected_row['longitude']):.6f}&travelmode=driving"
                 st.markdown(f"[🚗 Directions↗]({directions_url})")
-                if st.button("✎ Edit this adventure", key=f"map_edit_{selected_id}"):
+                if st.button("✏️ Edit this adventure", key=f"map_edit_{selected_id}"):
                     st.session_state["editing_adventure"] = str(selected_id)
                     st.info("Open the Adventures tab to edit the selected entry.")
             st.caption(f"{len(map_data)} adventure(s) with coordinates. Click a pin to select an adventure.")

@@ -38,8 +38,8 @@ input, textarea, [data-baseweb="select"] > div {border-radius:10px !important;}
 <div class="dd-hero">
   <div class="dd-kicker">✳ collect moments, not things ✳</div>
   <h1>The Dilly Dally List</h1>
-  <p>A little retro field guide for big fresh-air energy, spontaneous road trips, campfire nights, and places worth taking the long way to.</p>
-  <span class="dd-sticker">✿ TAKE THE SCENIC ROUTE</span><span class="dd-sticker">★ OUT THERE SOMEWHERE</span>
+  <p>Don’t adventures ever have an end? I suppose not. Someone else always has to carry on the story’ – Bilbo.</p>
+  <span class="dd-sticker">✿ JUST DILLY DALLYING</span><span class="dd-sticker">★ OUT THERE SOMEWHERE</span>
 </div>
 """, unsafe_allow_html=True)
 

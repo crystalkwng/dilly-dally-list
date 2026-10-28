@@ -66,7 +66,7 @@ def get_client():
     return create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_SERVICE_ROLE_KEY"])
 
 supabase = get_client()
-CATEGORIES = ["Hiking", "Day trips", "Camping", "Other"]
+CATEGORIES = ["Hiking", "Day trips", "Road trips", "Camping", "Biking", "Other"]
 STATUSES = ["Want to go", "Planned", "Completed"]
 DIFFICULTIES = ["Easy", "Moderate", "Hard", "Very hard", "Not applicable", "Unknown"]
 FIELDS = ["name", "category", "location", "distance_km", "elevation_gain_m", "difficulty", "status", "notes", "map_url", "latitude", "longitude"]
@@ -74,9 +74,11 @@ CATEGORY_ART = {
     "Hiking": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=85",
     "Day trips": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=700&q=85",
     "Camping": "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=700&q=85",
+    "Road trips": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=700&q=85",
+    "Biking": "https://images.unsplash.com/photo-1544191696-15693072b35a?auto=format&fit=crop&w=700&q=85",
     "Other": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=85",
 }
-CATEGORY_EMOJI = {"Hiking": "🥾", "Day trips": "🚙", "Camping": "🏕️", "Other": "🌼"}
+CATEGORY_EMOJI = {"Hiking": "🥾", "Day trips": "🚙", "Road trips": "🚗", "Camping": "🏕️", "Biking": "🚲", "Other": "🌼"}
 
 def load_adventures():
     result = supabase.table("adventures").select("*").order("name").execute()

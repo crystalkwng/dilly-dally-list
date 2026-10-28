@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import uuid
 from supabase import create_client
 from urllib.parse import quote
 
@@ -68,8 +69,8 @@ def get_client():
 supabase = get_client()
 CATEGORIES = ["Hiking", "Day trips", "Road trips", "Camping", "Biking", "Other"]
 STATUSES = ["Want to go", "Planned", "Completed"]
-DIFFICULTIES = ["Easy", "Moderate", "Hard", "Strenous", "Not applicable", "Unknown"]
-FIELDS = ["name", "category", "location", "distance_km", "elevation_gain_m", "difficulty", "status", "notes", "map_url", "latitude", "longitude"]
+DIFFICULTIES = ["Easy", "Moderate", "Hard", "Strenuous", "Not applicable", "Unknown"]
+FIELDS = ["name", "category", "location", "distance_km", "elevation_gain_m", "difficulty", "status", "notes", "map_url", "latitude", "longitude", "photo_url"]
 CATEGORY_ART = {
     "Hiking": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=85",
     "Day trips": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=700&q=85",
@@ -90,6 +91,34 @@ def save_adventure(values, adventure_id=None):
         supabase.table("adventures").update(values).eq("id", adventure_id).execute()
     else:
         supabase.table("adventures").insert(values).execute()
+
+def upload_adventure_photo(uploaded_file):
+    """Upload an image to Supabase Storage and return its public URL."""
+    if uploaded_file is None:
+        return None
+
+    extension = uploaded_file.name.rsplit(".", 1)[-1].lower() if "." in uploaded_file.name else ""
+    allowed_types = {
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "webp": "image/webp",
+        "gif": "image/gif",
+    }
+    if extension not in allowed_types:
+        raise ValueError("Please upload a JPG, PNG, WEBP, or GIF image.")
+
+    # Keep uploads reasonably sized for a phone-friendly app.
+    if uploaded_file.size > 10 * 1024 * 1024:
+        raise ValueError("Please choose an image smaller than 10 MB.")
+
+    path = f"{uuid.uuid4().hex}.{extension}"
+    supabase.storage.from_("adventure-photos").upload(
+        path,
+        uploaded_file.getvalue(),
+        file_options={"content-type": allowed_types[extension], "upsert": "false"},
+    )
+    return supabase.storage.from_("adventure-photos").get_public_url(path)
 
 def clean_text(value):
     if pd.isna(value):
@@ -165,7 +194,8 @@ with tab_list:
             with st.container(border=True):
                 picture, content = st.columns([1, 3], gap="medium")
                 category_name = row.get("category") or "Other"
-                picture.image(CATEGORY_ART.get(category_name, CATEGORY_ART["Other"]), use_container_width=True)
+                custom_photo = clean_text(row.get("photo_url", ""))
+                picture.image(custom_photo or CATEGORY_ART.get(category_name, CATEGORY_ART["Other"]), use_container_width=True)
                 picture.caption(f"{CATEGORY_EMOJI.get(category_name, '🌼')} {category_name.upper()}")
                 top1, top2 = content.columns([4, 1])
                 top1.markdown(f"### {row.get('name') or 'Untitled adventure'}")
@@ -200,6 +230,18 @@ with tab_list:
                         status = st.selectbox("Status", STATUSES, index=STATUSES.index(row["status"]) if row.get("status") in STATUSES else 0)
                         notes = st.text_area("Notes", value=clean_text(row.get("notes", "")))
                         map_url = st.text_input("Website or map link", value=clean_text(row.get("map_url", "")))
+                        photo_url = st.text_input(
+                            "Photo URL (optional)",
+                            value=clean_text(row.get("photo_url", "")),
+                            help="Paste a direct link to an image, or upload a replacement below.",
+                            key=f"edit_photo_url_{row['id']}",
+                        )
+                        uploaded_photo = st.file_uploader(
+                            "Upload a replacement photo (optional)",
+                            type=["jpg", "jpeg", "png", "webp", "gif"],
+                            key=f"edit_photo_file_{row['id']}",
+                        )
+                        clear_photo = st.checkbox("Remove custom photo and use the category picture", key=f"clear_photo_{row['id']}")
                         latcol, loncol = st.columns(2)
                         latitude = latcol.number_input("Latitude (optional, for map)", value=float(row["latitude"]) if pd.notna(row.get("latitude")) else 0.0, format="%.6f")
                         longitude = loncol.number_input("Longitude (optional, for map)", value=float(row["longitude"]) if pd.notna(row.get("longitude")) else 0.0, format="%.6f")
@@ -208,15 +250,26 @@ with tab_list:
                         if not name.strip():
                             st.error("Please enter an adventure name.")
                         else:
-                            save_adventure({
-                                "name": name.strip(), "category": category, "location": location.strip(),
-                                "distance_km": distance if distance > 0 else None, "elevation_gain_m": elevation_gain if elevation_gain > 0 else None, "difficulty": difficulty,
-                                "status": status, "notes": notes.strip(), "map_url": map_url.strip(),
-                                "latitude": latitude if latitude != 0 else None,
-                                "longitude": longitude if longitude != 0 else None
-                            }, row["id"])
-                            st.success("Adventure updated!")
-                            st.rerun()
+                            try:
+                                chosen_photo_url = photo_url.strip() or None
+                                if clear_photo:
+                                    chosen_photo_url = None
+                                elif uploaded_photo is not None:
+                                    chosen_photo_url = upload_adventure_photo(uploaded_photo)
+
+                                save_adventure({
+                                    "name": name.strip(), "category": category, "location": location.strip(),
+                                    "distance_km": distance if distance > 0 else None, "elevation_gain_m": elevation_gain if elevation_gain > 0 else None, "difficulty": difficulty,
+                                    "status": status, "notes": notes.strip(), "map_url": map_url.strip(),
+                                    "latitude": latitude if latitude != 0 else None,
+                                    "longitude": longitude if longitude != 0 else None,
+                                    "photo_url": chosen_photo_url,
+                                }, row["id"])
+                                st.success("Adventure updated!")
+                                st.rerun()
+                            except Exception as exc:
+                                st.error("Could not save the adventure or upload its photo. Check that the photo bucket is set up.")
+                                st.code(str(exc))
                     if st.button("Delete this adventure", key=f"delete_{row['id']}", type="secondary"):
                         st.session_state["confirm_delete"] = str(row["id"])
                     if st.session_state.get("confirm_delete") == str(row["id"]):
@@ -259,6 +312,12 @@ with tab_add:
         status = st.selectbox("Status", STATUSES)
         notes = st.text_area("Notes", placeholder="Parking, best time to go, things to bring...")
         map_url = st.text_input("Website or map link", placeholder="https://...")
+        photo_url = st.text_input("Photo URL (optional)", placeholder="Paste a direct image link")
+        uploaded_photo = st.file_uploader(
+            "Or upload a photo (optional)",
+            type=["jpg", "jpeg", "png", "webp", "gif"],
+            key="new_adventure_photo",
+        )
         st.caption("Optional: enter map coordinates to show this adventure as a pin on the map.")
         col3, col4 = st.columns(2)
         latitude = col3.number_input("Latitude", value=0.0, format="%.6f")
@@ -269,12 +328,16 @@ with tab_add:
             st.error("Please enter an adventure name.")
         else:
             try:
+                chosen_photo_url = photo_url.strip() or None
+                if uploaded_photo is not None:
+                    chosen_photo_url = upload_adventure_photo(uploaded_photo)
                 save_adventure({
                     "name": name.strip(), "category": category, "location": location.strip(),
                     "distance_km": distance if distance > 0 else None, "elevation_gain_m": elevation_gain if elevation_gain > 0 else None, "difficulty": difficulty,
                     "status": status, "notes": notes.strip(), "map_url": map_url.strip(),
                     "latitude": latitude if latitude != 0 else None,
-                    "longitude": longitude if longitude != 0 else None
+                    "longitude": longitude if longitude != 0 else None,
+                    "photo_url": chosen_photo_url,
                 })
                 st.success(f"Added '{name.strip()}' to The Dilly Dally List!")
                 st.rerun()

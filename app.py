@@ -55,8 +55,18 @@ h1, h2, h3, h4, h5, h6,
 [data-testid="stMetricValue"] {color:#7562A5; font-family:var(--heading-font) !important;}
 [data-testid="stTabs"] button {font-family:var(--body-font) !important; font-weight:600; border-radius:999px; padding:.55rem 1rem;}
 [data-testid="stTabs"] button[aria-selected="true"] {background:#342D4F; color:#FFFDF9;}
-.stButton button, [data-testid="stFormSubmitButton"] button {border:2px solid #342D4F; border-radius:999px; font-weight:700; min-height:2.65rem; line-height:1.35; padding:.45rem .7rem; white-space:nowrap; overflow:visible; box-shadow:3px 3px 0 #83B5D1; transition:transform .15s ease;}
+.stButton button, [data-testid="stFormSubmitButton"] button {border:2px solid #342D4F; border-radius:999px; font-weight:700; min-height:2.65rem; line-height:1.35; padding-top:.45rem; padding-bottom:.45rem; overflow:visible; box-shadow:3px 3px 0 #83B5D1; transition:transform .15s ease;}
 .stButton button:hover, [data-testid="stFormSubmitButton"] button:hover {transform:translate(-1px,-1px); border-color:#342D4F; box-shadow:4px 4px 0 #71977C;}
+/* Keep the Edit adventure control compact while allowing its full label to show. */
+div[class*="st-key-edit_toggle_"] button {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  font-size: .88rem !important;
+  padding-left: .65rem !important;
+  padding-right: .65rem !important;
+}
 [data-testid="stForm"] {background:var(--paper); border:2px solid #D7CDE6; border-radius:18px; padding:1.1rem;}
 [data-testid="stExpander"] {background:var(--paper); border:1px solid #D7CDE6; border-radius:12px;}
 input, textarea, [data-baseweb="select"] > div {border-radius:10px !important;}
@@ -344,9 +354,8 @@ with tab_list:
                                 st.error("Could not upload this file. Check that the attachment bucket and table are set up.")
                                 st.code(str(exc))
 
-                # Give the edit button enough width so its pencil icon and label stay visible.
                 action_col, spacer_col = content.columns([2, 4])
-                if action_col.button("✏️ Edit adventure", key=f"edit_toggle_{row['id']}", use_container_width=True):
+                if action_col.button("✏️ Edit adventure", key=f"edit_toggle_{row['id']}", use_container_width=False):
                     current_edit = st.session_state.get("editing_adventure")
                     if current_edit == str(row["id"]):
                         st.session_state.pop("editing_adventure", None)

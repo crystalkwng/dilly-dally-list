@@ -219,7 +219,18 @@ with tab_list:
                 elif row.get("location"):
                     query = quote(str(row.get("location")))
                     content.markdown(f"[Find on Google Maps ↗](https://www.google.com/maps/search/?api=1&query={query})")
-                with st.expander("✎ Edit this adventure"):
+                action_col, spacer_col = content.columns([1, 5])
+                if action_col.button("✎ Edit adventure", key=f"edit_toggle_{row['id']}", use_container_width=True):
+                    current_edit = st.session_state.get("editing_adventure")
+                    if current_edit == str(row["id"]):
+                        st.session_state.pop("editing_adventure", None)
+                    else:
+                        st.session_state["editing_adventure"] = str(row["id"])
+                    st.rerun()
+
+                if st.session_state.get("editing_adventure") == str(row["id"]):
+                    st.markdown("#### ✎ Edit your adventure")
+                    st.caption("Make your changes below, then save. Your shared list will update for everyone.")
                     with st.form(f"edit_{row['id']}"):
                         name = st.text_input("Adventure name", value=clean_text(row.get("name", "")))
                         category = st.selectbox("Adventure type", CATEGORIES, index=CATEGORIES.index(row["category"]) if row.get("category") in CATEGORIES else 0)
@@ -246,6 +257,10 @@ with tab_list:
                         latitude = latcol.number_input("Latitude (optional, for map)", value=float(row["latitude"]) if pd.notna(row.get("latitude")) else 0.0, format="%.6f")
                         longitude = loncol.number_input("Longitude (optional, for map)", value=float(row["longitude"]) if pd.notna(row.get("longitude")) else 0.0, format="%.6f")
                         saved = st.form_submit_button("Save changes", use_container_width=True)
+                    cancel_col, _ = st.columns([1, 5])
+                    if cancel_col.button("Cancel editing", key=f"cancel_edit_{row['id']}"):
+                        st.session_state.pop("editing_adventure", None)
+                        st.rerun()
                     if saved:
                         if not name.strip():
                             st.error("Please enter an adventure name.")
@@ -265,23 +280,27 @@ with tab_list:
                                     "longitude": longitude if longitude != 0 else None,
                                     "photo_url": chosen_photo_url,
                                 }, row["id"])
+                                st.session_state.pop("editing_adventure", None)
                                 st.success("Adventure updated!")
                                 st.rerun()
                             except Exception as exc:
                                 st.error("Could not save the adventure or upload its photo. Check that the photo bucket is set up.")
                                 st.code(str(exc))
-                    if st.button("Delete this adventure", key=f"delete_{row['id']}", type="secondary"):
-                        st.session_state["confirm_delete"] = str(row["id"])
-                    if st.session_state.get("confirm_delete") == str(row["id"]):
-                        st.warning("Are you sure? This cannot be undone.")
-                        yes, no = st.columns(2)
-                        if yes.button("Yes, delete", key=f"yes_{row['id']}", type="primary"):
-                            supabase.table("adventures").delete().eq("id", row["id"]).execute()
-                            st.session_state.pop("confirm_delete", None)
-                            st.rerun()
-                        if no.button("Cancel", key=f"no_{row['id']}"):
-                            st.session_state.pop("confirm_delete", None)
-                            st.rerun()
+
+                if st.button("🗑 Delete adventure", key=f"delete_{row['id']}", type="secondary"):
+                    st.session_state["confirm_delete"] = str(row["id"])
+                if st.session_state.get("confirm_delete") == str(row["id"]):
+                    st.warning("Are you sure? This cannot be undone.")
+                    yes, no = st.columns(2)
+                    if yes.button("Yes, delete", key=f"yes_{row['id']}", type="primary"):
+                        supabase.table("adventures").delete().eq("id", row["id"]).execute()
+                        st.session_state.pop("confirm_delete", None)
+                        if st.session_state.get("editing_adventure") == str(row["id"]):
+                            st.session_state.pop("editing_adventure", None)
+                        st.rerun()
+                    if no.button("Cancel", key=f"no_{row['id']}"):
+                        st.session_state.pop("confirm_delete", None)
+                        st.rerun()
 
 with tab_map:
     st.markdown("<div class='dd-section'>✹ The wander map</div>", unsafe_allow_html=True)

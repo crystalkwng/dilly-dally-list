@@ -215,7 +215,7 @@ with tab_list:
                 if row.get("notes"):
                     content.markdown(f"<div class='dd-note'>✿ {row.get('notes')}</div>", unsafe_allow_html=True)
                 if row.get("map_url"):
-                    content.markdown(f"[Open map or website ↗]({row.get('map_url')})")
+                    content.markdown(f"[The Finer Details ↗]({row.get('map_url')})")
                 elif row.get("location"):
                     query = quote(str(row.get("location")))
                     content.markdown(f"[Find on Google Maps ↗](https://www.google.com/maps/search/?api=1&query={query})")
